@@ -1,0 +1,114 @@
+type: edu
+files:
+- name: src/server/Main.java
+  visible: true
+  text: "package server;\nimport java.util.*;\n\npublic class Main {\n    static List<String>\
+    \ files = new ArrayList<>();\n    \n    public static void main(String[] args)\
+    \ {\n       \n        Scanner sc = new Scanner(System.in); \n        boolean exit\
+    \ = false;\n        String[] input;\n        \n        while (!exit) {\n     \
+    \       input = parseInput(sc.nextLine());\n            String command = input[0];\n\
+    \            \n            if (command.equals(\"exit\")) {\n                exit\
+    \ = true;\n            } else {\n                String fileName = input[1];\n\
+    \                \n                if (command.equals(\"add\")) {\n          \
+    \          addFile(fileName);\n                } else if (command.equals(\"get\"\
+    )) {\n                    getFile(fileName);\n                } else if (command.equals(\"\
+    delete\")) {\n                    deleteFile(fileName);\n                }\n \
+    \           }\n            \n        }\n        \n    }\n    \n    private static\
+    \ String[] parseInput(String str) {\n        return str.split(\" \");\n    }\n\
+    \    \n    private static void addFile(String fileName) {\n        if (files.contains(fileName)\
+    \ || !checkFileName(fileName)) {\n            System.out.println(String.format(\"\
+    Cannot add the file %s\", fileName));\n        } else {\n            files.add(fileName);\n\
+    \            System.out.println(String.format(\"The file %s added successfully\"\
+    , fileName));\n        }\n    }\n    \n    private static void getFile(String\
+    \ fileName) {\n        if (files.contains(fileName)) {\n            System.out.println(String.format(\"\
+    The file %s was sent\", fileName));\n        } else {\n            System.out.println(String.format(\"\
+    The file %s not found\", fileName));\n        }\n    }\n    \n    private static\
+    \ void deleteFile(String fileName) {\n        if (files.contains(fileName)) {\n\
+    \            System.out.println(String.format(\"The file %s was deleted\", fileName));\n\
+    \            files.remove(fileName);\n        } else {\n            System.out.println(String.format(\"\
+    The file %s not found\", fileName));\n\n        }\n    }\n    \n    private static\
+    \ boolean checkFileName(String fileName) {\n        try {\n            int number\
+    \ = Integer.parseInt(String.valueOf(fileName.substring(4)));\n            \n \
+    \           return fileName.startsWith(\"file\") && number >= 1 && number <= 10;\n\
+    \        } catch (Exception e) {\n            return false;\n        }\n    }\n\
+    }"
+  learner_created: false
+- name: test/FileServerTest.java
+  visible: false
+  text: |
+    import org.hyperskill.hstest.dynamic.input.DynamicTestingMethod;
+    import org.hyperskill.hstest.exception.outcomes.WrongAnswer;
+    import org.hyperskill.hstest.stage.StageTest;
+    import org.hyperskill.hstest.testcase.CheckResult;
+    import org.hyperskill.hstest.testing.TestedProgram;
+
+
+    public class FileServerTest extends StageTest<String> {
+
+        @DynamicTestingMethod
+        CheckResult test() throws InterruptedException {
+
+            TestedProgram client = new TestedProgram("client");
+            TestedProgram server = new TestedProgram("server");
+            server.setReturnOutputAfterExecution(true);
+
+            server.startInBackground();
+
+            Thread.sleep(1000);
+            String serverOutput = server.getOutput().trim();
+
+            String serverStartedMessage = "Server started!";
+            if (!serverOutput.equals(serverStartedMessage)) {
+                throw new WrongAnswer("Server output should be \"" + serverStartedMessage + "\" until the client connects!");
+            }
+
+            String clientOutput = client.start().trim();
+            serverOutput = server.getOutput().trim();
+
+            if (clientOutput.isEmpty()) {
+                return CheckResult.wrong("Client output shouldn't be empty!");
+            }
+
+            if (serverOutput.equals(serverStartedMessage)) {
+                return CheckResult.wrong("After the client connects to the server you should output the received data!");
+            }
+
+            if (!serverOutput.contains("Received: Give me everything you have!")) {
+                return CheckResult.wrong("Server output should contain \"Received: Give me everything you have!\"");
+            }
+
+            if (!serverOutput.contains("Sent: All files were sent!")) {
+                return CheckResult.wrong("Server output should contain \"Sent: All files were sent!\"");
+            }
+
+            if (serverOutput.indexOf("Sent: All files were sent!") < serverOutput.indexOf("Received: Give me everything you have!")) {
+                return CheckResult.wrong("The server should print \"Sent: All files were sent!\" only after " +
+                    "\"Received: Give me everything you have!\" was printed!");
+            }
+
+            if (!clientOutput.contains("Sent: Give me everything you have!")) {
+                return CheckResult.wrong("Client output should contain \"Sent: Give me everything you have!\"");
+            }
+
+            if (!clientOutput.contains("Received: All files were sent!")) {
+                return CheckResult.wrong("Client output should contain \"Received: All files were sent!\"");
+            }
+
+            if (clientOutput.indexOf("Received: All files were sent!") < clientOutput.indexOf("Sent: Give me everything you have!")) {
+                return CheckResult.wrong("The client should print \"Received: All files were sent!\" only after " +
+                    "\"Sent: Give me everything you have!\" was printed!");
+            }
+
+            return CheckResult.correct();
+        }
+    }
+  learner_created: false
+- name: src/client/Main.java
+  visible: true
+  learner_created: true
+feedback_link: https://hyperskill.org/learn/step/5426#comment
+status: Solved
+feedback:
+  message: Congratulations!
+  time: Tue, 08 Feb 2022 05:36:42 UTC
+record: 2
